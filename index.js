@@ -6,15 +6,16 @@ const {MongoClient} = require('mongodb');
 const objectId = require('mongodb').ObjectId;
 const cors = require ('cors');
 require('dotenv').config();
+const stripe = require("stripe")('sk_test_51KYs7CKJTqhSIZhtGL5EQUNlDzmkkm4fLNX9qRbTidEXIR7y7g3BM3HnXDewnLdUpvnkhvzycwmBxnAREIDJKJdB00o0nAbigy');
 // --------these all are middleware-------
 app.use(cors());
 app.use(express.json());
 const { query } = require('express');
 const {  ObjectId } = require('bson');
 // connect mongo
-const uri = "mongodb+srv://furns:furns556@cluster0.fqe4k.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
+const uri = "mongodb+srv://final:final11@cluster0.3tttp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true});
 
 async function run(){
     try {
@@ -30,7 +31,7 @@ async function run(){
 
 
 
-        // ---------------home--------------
+        // ---------------home--------------      
       // post api
       app.post('/homefurn',async(req,res)=>{
         const homefurn = req.body;
@@ -193,7 +194,7 @@ async function run(){
               const querry = {email: email};
               const user = await usersCollection.findOne(querry);
               let isAdmin = false ;
-              if(user.role === 'admin' ){
+              if(user?.role === 'admin' ){
                     isAdmin = true;
               }
               res.json({admin: isAdmin});
@@ -228,7 +229,39 @@ async function run(){
                   console.log(result);
                   res.json(result);
           })
-              
+               // paymennt
+          app.get('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await ordersCollection.findOne(query);
+            res.json(result);
+        });
+
+         // update
+         app.put('/orders/:id', async (req, res) => {
+          const id = req.params.id;
+          const payment=req.body;
+          const filter = { _id: ObjectId(id)};
+          const updateDoc = {
+            $set :{
+              payment : payment
+            }
+          };
+          const result = await ordersCollection.updateOne(filter,updateDoc);
+          res.json(result);
+      });
+
+            // payment
+        app.post('/create-payment-intent', async (req, res) => {
+          const paymentInfo = req.body;
+          const amount = paymentInfo.price * 100;
+          const paymentIntent = await stripe.paymentIntents.create({
+              currency: 'usd',
+              amount: amount,
+              payment_method_types: ['card']
+          });
+          res.json({ clientSecret: paymentIntent.client_secret })
+      })
 
     } 
     finally{
