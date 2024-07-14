@@ -1,16 +1,22 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "start-dev": "nodemon index.js",
+    "build": "npx babel src -d dist",
+    "start-dev": "nodemon --exec npx babel-node src/server.js",
+    "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@babel/cli": "^7.24.8",
+    "@babel/core": "^7.24.8",
+    "@babel/node": "^7.24.8",
+    "@babel/preset-env": "^7.24.8",
+    "@babel/preset-flow": "^7.24.7",
     "@stripe/stripe-js": "^1.24.0",
     "body-parser": "^1.19.2",
     "cors": "^2.8.5",
